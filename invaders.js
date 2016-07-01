@@ -7,13 +7,12 @@ var PARAMS = Object.freeze({
   MOVE_THRESHOLD: 200
 });
   
-document.addEventListener("DOMContentLoaded", function(event) { 
+document.addEventListener('DOMContentLoaded', function(){
 
   var ctx = document.getElementById('fleet-display').getContext('2d');
-
-  document.getElementById('button-progress').addEventListener('click', function(){
-    startGeneration();
-  });
+  var progressButton = document.getElementById('button-progress');
+  var clickHandler = function(){ startGeneration(); };
+  progressButton.addEventListener('click', clickHandler);
 
   // One half of the basic invader, 6x8.
   // Invaders are symmetrical to a vertical axis, making the final size 11x8 pixels.
@@ -48,18 +47,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
     inputArea.addEventListener('mousemove', moveCounter);
 
+    progressButton.removeEventListener('click', clickHandler);
+    progressButton.innerHTML = 'Generating fleet... (0/'+mutators.length+')';
+
     //Dispatch a timeout for each mutator, with increasing delays. Mouse moves are
     // collected between the callbacks, creating the input seed for each mutator.
     mutators.forEach(function(_, i){
       setTimeout(function(){
+        progressButton.innerHTML = 'Generating fleet... ('+(i+1)+'/'+mutators.length+')';
         inputSeed.push({ moveCount: moveCount });
         moveCount = 0;
         if(i===mutators.length-1){
           inputArea.removeEventListener('mousemove', moveCounter);
           callback(inputSeed);
+          progressButton.innerHTML = 'Fleet generated. (Click to restart)';
+          progressButton.addEventListener('click', clickHandler);
         }
-      }, PARAMS.COLLECTION_TIME*i+1);
+      }, PARAMS.COLLECTION_TIME*(i+1));
     });
+
   }
 
   //TODO: extend this function to display rows (the whole fleet)
