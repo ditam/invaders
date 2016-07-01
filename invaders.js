@@ -78,12 +78,22 @@ function mutateInvader(base, inputs){
 }
 
 function antennaMutator(invader, input){
+  var basePixel = {
+    color: getColorString(input.moveCount)
+  };
   var part = [
-    [{color: 'rgb(200,0,0)'},{color: 'rgb(200,0,0)'}],
-    [{color: 'rgb(200,0,0)'},{color: 'rgb(200,0,0)'}]
+    [basePixel,0,0],
+    [0,basePixel,0],
+    [basePixel,basePixel,basePixel]
   ];
   //TODO mutate based on input
   return applyPart(invader, part, 2, 0);
+}
+
+function getColorString(moveCount){
+  var n = 256-Math.min(PARAMS.MOVE_THRESHOLD,moveCount);
+  //greyscale for now TODO: colorize with RGB bias param?
+  return 'rgb('+n+','+n+','+n+')';
 }
 
 function applyPart(base, part, x, y){
