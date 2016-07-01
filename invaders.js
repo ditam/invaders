@@ -14,20 +14,30 @@ document.addEventListener('DOMContentLoaded', function(){
   var clickHandler = function(){ startGeneration(); };
   progressButton.addEventListener('click', clickHandler);
 
-  // One half of the basic invader, 6x8.
-  // Invaders are symmetrical to a vertical axis, making the final size 11x8 pixels.
+  // Only one half, a 6x8 grid is stored for an invader, because they are 
+  // symmetrical to the vertical axis (making their final size 11x8 pixels).
+  // The half of the "standard" space invader looks like this:
+  //[0,0,1,0,0,0],
+  //[0,0,0,1,0,0],
+  //[0,0,1,1,1,1],
+  //[0,1,1,0,1,1],
+  //[1,1,1,1,1,1],
+  //[1,0,1,1,1,1],
+  //[1,0,1,0,0,0],
+  //[0,0,0,1,1,0],
+  //but it's not necessary to store this, because the mutators recreate it if there's no mouse input
+
   var baseInvader = [
-    [0,0,_1,0,0,0],
-    [0,0,0,_1,0,0],
-    [0,0,_1,_1,_1,_1],
-    [0,_1,_1,0,_1,_1],
-    [_1,_1,_1,_1,_1,_1],
-    [_1,0,_1,_1,_1,_1],
-    [_1,0,_1,0,0,0],
-    [0,0,0,_1,_1,0],
+    [0,0,0,0,0,0],
+    [0,0,0,0,0,0],
+    [0,0,0,0,0,0],
+    [0,0,0,0,0,0],
+    [0,0,0,0,0,0],
+    [0,0,0,0,0,0],
+    [0,0,0,0,0,0],
+    [0,0,0,0,0,0],
   ];
 
-  //NB: hullMutator should come before antennaMutator, because they overlap
   var mutators = [hullMutator, antennaMutator, weaponMutator, thrusterMutator];
 
   function startGeneration() {
@@ -117,6 +127,7 @@ function weaponMutator(invader, input){
     color: getColorString(input.moveCount)
   };
   var part = [
+    [0,0],
     [0,0],
     [0,0],
     [0,basePixel],
