@@ -87,14 +87,27 @@ function mutateInvader(base, inputs, mutators){
   return invader;
 }
 
+function hullMutator(invader, input){
+  var basePixel = {
+    color: getColorString(input.moveCount)
+  };
+  var part = [
+    [0,0,0,basePixel], // antenna will overwrite first 3 anyway
+    [basePixel,0,basePixel,basePixel], //2nd empty for "eye"
+    [basePixel,basePixel,basePixel,basePixel],
+    [basePixel,basePixel,basePixel,basePixel]
+  ];
+  return applyPart(invader, part, 2, 2);
+}
+
 function antennaMutator(invader, input){
   var basePixel = {
     color: getColorString(input.moveCount)
   };
   var part = [
-    [basePixel,0,0],
-    [0,basePixel,0],
-    [basePixel,basePixel,basePixel]
+    [basePixel,0,0,0],
+    [0,basePixel,0,0],
+    [basePixel,basePixel,basePixel,null]
   ];
   return applyPart(invader, part, 2, 0);
 }
@@ -104,12 +117,15 @@ function weaponMutator(invader, input){
     color: getColorString(input.moveCount)
   };
   var part = [
+    [0,0],
+    [0,0],
     [0,basePixel],
     [basePixel,basePixel],
     [basePixel,0],
-    [basePixel,0]
+    [basePixel,0],
+    [0,0]
   ];
-  return applyPart(invader, part, 0, 3);
+  return applyPart(invader, part, 0, 0);
 }
 
 function thrusterMutator(invader, input){
@@ -123,19 +139,6 @@ function thrusterMutator(invader, input){
   return applyPart(invader, part, 2, 6);
 }
 
-function hullMutator(invader, input){
-  var basePixel = {
-    color: getColorString(input.moveCount)
-  };
-  var part = [
-    [0,0,0,basePixel], // first three overlaps with antenna
-    [basePixel,0,basePixel,basePixel], //2nd empty for "eye"
-    [basePixel,basePixel,basePixel,basePixel],
-    [basePixel,basePixel,basePixel,basePixel]
-  ];
-  return applyPart(invader, part, 2, 2);
-}
-
 function getColorString(moveCount){
   var n = 256-Math.min(PARAMS.MOVE_THRESHOLD,moveCount);
   //greyscale for now TODO: colorize with RGB bias param?
@@ -146,7 +149,9 @@ function applyPart(base, part, x, y){
   var invader = deepCopy(base);
   for(var i=0;i<part.length;i++){
     for(var j=0;j<part[i].length;j++){
-      invader[y+i][x+j] = part[i][j];
+      if(part[i][j] != null){ // null signals ignore, 0 signals overwrite with empty
+        invader[y+i][x+j] = part[i][j];
+      }
     }
   }
   return invader;
