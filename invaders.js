@@ -3,7 +3,7 @@
 };
 
 var PARAMS = Object.freeze({
-  COLLECTION_TIME: 2000,
+  COLLECTION_TIME: 1000,
   MOVE_THRESHOLD: 200
 });
   
@@ -28,18 +28,19 @@ document.addEventListener("DOMContentLoaded", function(event) {
     [0,0,0,_1,_1,0],
   ];
 
+  //NB: hullMutator should come before antennaMutator, because they overlap
+  var mutators = [hullMutator, antennaMutator, weaponMutator, thrusterMutator];
+
   function startGeneration() {
     collectInput(function(inputs){
-      var invader = generate(inputs);
+      var invader = mutateInvader(baseInvader, inputs, mutators);
       display(invader);
     });
   }
 
   function collectInput(callback){
-    //NB: input seed array's length should equal no. of mutators!
-    var inputSeed = [{}];
-
     var inputArea = document.getElementById('input-area');
+    var inputSeed = [];
     var moveCount = 0;
     var moveCounter = function(){
       moveCount++;
@@ -47,17 +48,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
     inputArea.addEventListener('mousemove', moveCounter);
 
-    setTimeout(function(){
-      inputArea.removeEventListener('mousemove', moveCounter);
-      inputSeed[0].moveCount = moveCount;
-      callback(inputSeed);
-    }, PARAMS.COLLECTION_TIME);
+    //Dispatch a timeout for each mutator, with increasing delays. Mouse moves are
+    // collected between the callbacks, creating the input seed for each mutator.
+    mutators.forEach(function(_, i){
+      setTimeout(function(){
+        inputSeed.push({ moveCount: moveCount });
+        moveCount = 0;
+        if(i===mutators.length-1){
+          inputArea.removeEventListener('mousemove', moveCounter);
+          callback(inputSeed);
+        }
+      }, PARAMS.COLLECTION_TIME*i+1);
+    });
   }
 
-  function generate(inputSeed){
-    return mutateInvader(baseInvader, inputSeed);
-  }
-
+  //TODO: extend this function to display rows (the whole fleet)
   function display(invader){
     drawInvader(ctx,0,0,invader);
   }
@@ -68,9 +73,8 @@ function deepCopy(obj){
   return JSON.parse(JSON.stringify(obj));
 }
 
-function mutateInvader(base, inputs){
+function mutateInvader(base, inputs, mutators){
   var invader = deepCopy(base);
-  mutators = [antennaMutator/*, weaponMutator, thrusterMutator*/];
   mutators.forEach(function(mutator, i){
     invader = mutator(invader, inputs[i]);
   });
@@ -86,8 +90,44 @@ function antennaMutator(invader, input){
     [0,basePixel,0],
     [basePixel,basePixel,basePixel]
   ];
-  //TODO mutate based on input
   return applyPart(invader, part, 2, 0);
+}
+
+function weaponMutator(invader, input){
+  var basePixel = {
+    color: getColorString(input.moveCount)
+  };
+  var part = [
+    [0,basePixel],
+    [basePixel,basePixel],
+    [basePixel,0],
+    [basePixel,0]
+  ];
+  return applyPart(invader, part, 0, 3);
+}
+
+function thrusterMutator(invader, input){
+  var basePixel = {
+    color: getColorString(input.moveCount)
+  };
+  var part = [
+    [basePixel,0,0,0],
+    [0,basePixel,basePixel,0]
+  ];
+  return applyPart(invader, part, 2, 6);
+}
+
+function hullMutator(invader, input){
+  var basePixel = {
+    color: getColorString(input.moveCount)
+  };
+  var part = [
+    [0,0,0,basePixel], // first three overlaps with antenna
+    [basePixel,0,basePixel,basePixel], //2nd empty for "eye"
+    [basePixel,basePixel,basePixel,basePixel],
+    [basePixel,basePixel,basePixel,basePixel]
+  ];
+  return applyPart(invader, part, 2, 2);
 }
 
 function getColorString(moveCount){
