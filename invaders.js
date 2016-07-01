@@ -49,10 +49,21 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function collectInput(callback){
     var inputArea = document.getElementById('input-area');
+    var inputWidth = inputArea.getBoundingClientRect().width; //NB this includes borders
+    var inputHeight = inputArea.getBoundingClientRect().height;
     var inputSeed = [];
     var moveCount = 0;
-    var moveCounter = function(){
+    var firstMove;
+    var lastMove;
+    var moveCounter = function(event){
       moveCount++;
+      var X = event.clientX - this.getBoundingClientRect().left;
+      var Y = event.clientY - this.getBoundingClientRect().top;
+      if(firstMove){
+        lastMove = {x: X, y: Y};
+      } else {
+        firstMove = {x: X, y: Y};
+      }
     };
 
     inputArea.addEventListener('mousemove', moveCounter);
@@ -65,8 +76,14 @@ document.addEventListener('DOMContentLoaded', function(){
     mutators.forEach(function(_, i){
       setTimeout(function(){
         progressButton.innerHTML = 'Generating fleet... ('+(i+1)+'/'+mutators.length+')';
-        inputSeed.push({ moveCount: moveCount });
+        inputSeed.push({
+          moveCount: moveCount,
+          firstMove: firstMove,
+          lastMove: lastMove
+        });
         moveCount = 0;
+        firstMove = undefined;
+        lastMove = undefined;
         if(i===mutators.length-1){
           inputArea.removeEventListener('mousemove', moveCounter);
           callback(inputSeed);
