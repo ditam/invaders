@@ -1,10 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", function(event) { 
 
-  var ctx;
-  var canvas = document.getElementById('fleet-display');
-  if (canvas.getContext) {
-    ctx = canvas.getContext('2d');
-  }
+  var ctx = document.getElementById('fleet-display').getContext('2d');
 
   document.getElementById('button-progress').addEventListener('click', function(){
     draw();
@@ -24,9 +20,46 @@
   ];
 
   function draw() {
-    drawInvader(ctx,0,0,baseInvader);
+    //TODO: generate input seed object - length should equal no. of mutators!
+    var inputSeed = [
+      {movement: 0}
+    ];
+    var invader = mutateInvader(baseInvader, inputSeed);
+    drawInvader(ctx,0,0,invader);
   }
 });
+
+function deepCopy(obj){
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function mutateInvader(base, inputs){
+  var invader = deepCopy(base);
+  mutators = [antennaMutator/*, weaponMutator, thrusterMutator*/];
+  mutators.forEach(function(mutator, i){
+    invader = mutator(invader, inputs[i]);
+  });
+  return invader;
+}
+
+function antennaMutator(invader, input){
+  var part = [
+    [1,1,1],
+    [1,1,1]
+  ];
+  //TODO mutate based on input
+  return applyPart(invader, part, 2, 0);
+}
+
+function applyPart(base, part, x, y){
+  var invader = deepCopy(base);
+  for(var i=0;i<part.length;i++){
+    for(var j=0;j<part[i].length;j++){
+      invader[y+i][x+j] = 1;
+    }
+  }
+  return invader;
+}
 
 function drawInvader(context, x0, y0, invader){
   var pixelSize = 10;
