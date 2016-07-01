@@ -1,22 +1,26 @@
-﻿document.addEventListener("DOMContentLoaded", function(event) { 
+﻿var _1 = {
+  color: 'rgb(200,200,100)'
+};
+  
+document.addEventListener("DOMContentLoaded", function(event) { 
 
   var ctx = document.getElementById('fleet-display').getContext('2d');
 
   document.getElementById('button-progress').addEventListener('click', function(){
     draw();
-  });
-  
+  });  
+
   // One half of the basic invader, 6x8.
   // Invaders are symmetrical to a vertical axis, making the final size 11x8 pixels.
   var baseInvader = [
-    [0,0,1,0,0,0],
-    [0,0,0,1,0,0],
-    [0,0,1,1,1,1],
-    [0,1,1,0,1,1],
-    [1,1,1,1,1,1],
-    [1,0,1,1,1,1],
-    [1,0,1,0,0,0],
-    [0,0,0,1,1,0],
+    [0,0,_1,0,0,0],
+    [0,0,0,_1,0,0],
+    [0,0,_1,_1,_1,_1],
+    [0,_1,_1,0,_1,_1],
+    [_1,_1,_1,_1,_1,_1],
+    [_1,0,_1,_1,_1,_1],
+    [_1,0,_1,0,0,0],
+    [0,0,0,_1,_1,0],
   ];
 
   function draw() {
@@ -44,8 +48,8 @@ function mutateInvader(base, inputs){
 
 function antennaMutator(invader, input){
   var part = [
-    [1,1,1],
-    [1,1,1]
+    [{color: 'rgb(200,0,0)'},{color: 'rgb(200,0,0)'}],
+    [{color: 'rgb(200,0,0)'},{color: 'rgb(200,0,0)'}]
   ];
   //TODO mutate based on input
   return applyPart(invader, part, 2, 0);
@@ -55,7 +59,7 @@ function applyPart(base, part, x, y){
   var invader = deepCopy(base);
   for(var i=0;i<part.length;i++){
     for(var j=0;j<part[i].length;j++){
-      invader[y+i][x+j] = 1;
+      invader[y+i][x+j] = part[i][j];
     }
   }
   return invader;
@@ -71,6 +75,7 @@ function drawInvader(context, x0, y0, invader){
     for(var x=0;x<len*2-1;x++){ 
       var xPos = x>=len? x-(x-len+1)*2 : x;
       if(invader[y][xPos]){
+        context.fillStyle = invader[y][xPos].color;
         context.fillRect(x0+x*pixelSize,y0+y*pixelSize,pixelSize,pixelSize);        
       }
     }
