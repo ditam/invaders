@@ -1,14 +1,19 @@
 ﻿var _1 = {
   color: 'rgb(200,200,100)'
 };
+
+var PARAMS = Object.freeze({
+  COLLECTION_TIME: 2000,
+  MOVE_THRESHOLD: 200
+});
   
 document.addEventListener("DOMContentLoaded", function(event) { 
 
   var ctx = document.getElementById('fleet-display').getContext('2d');
 
   document.getElementById('button-progress').addEventListener('click', function(){
-    draw();
-  });  
+    startGeneration();
+  });
 
   // One half of the basic invader, 6x8.
   // Invaders are symmetrical to a vertical axis, making the final size 11x8 pixels.
@@ -23,14 +28,40 @@ document.addEventListener("DOMContentLoaded", function(event) {
     [0,0,0,_1,_1,0],
   ];
 
-  function draw() {
-    //TODO: generate input seed object - length should equal no. of mutators!
-    var inputSeed = [
-      {movement: 0}
-    ];
-    var invader = mutateInvader(baseInvader, inputSeed);
+  function startGeneration() {
+    collectInput(function(inputs){
+      var invader = generate(inputs);
+      display(invader);
+    });
+  }
+
+  function collectInput(callback){
+    //NB: input seed array's length should equal no. of mutators!
+    var inputSeed = [{}];
+
+    var inputArea = document.getElementById('input-area');
+    var moveCount = 0;
+    var moveCounter = function(){
+      moveCount++;
+    };
+
+    inputArea.addEventListener('mousemove', moveCounter);
+
+    setTimeout(function(){
+      inputArea.removeEventListener('mousemove', moveCounter);
+      inputSeed[0].moveCount = moveCount;
+      callback(inputSeed);
+    }, PARAMS.COLLECTION_TIME);
+  }
+
+  function generate(inputSeed){
+    return mutateInvader(baseInvader, inputSeed);
+  }
+
+  function display(invader){
     drawInvader(ctx,0,0,invader);
   }
+
 });
 
 function deepCopy(obj){
