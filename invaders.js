@@ -1,8 +1,10 @@
 ﻿var PARAMS = Object.freeze({
   COLLECTION_TIME: 1000,
   MOVE_THRESHOLD: 200,
+  MOVE_ADJUSTMENT_MULTIPLIER: 2,
   CANVAS_WIDTH: 500,
-  CANVAS_HEIGHT: 300
+  CANVAS_HEIGHT: 300,
+  PIXEL_SIZE: 10
 });
   
 document.addEventListener('DOMContentLoaded', function(){
@@ -175,7 +177,7 @@ function thrusterMutator(invader, input){
 }
 
 function getColorString(moveCount){
-  var n = 256-Math.min(PARAMS.MOVE_THRESHOLD,moveCount);
+  var n = 256-Math.min(PARAMS.MOVE_THRESHOLD,moveCount*PARAMS.MOVE_ADJUSTMENT_MULTIPLIER);
   //greyscale for now TODO: colorize with RGB bias param?
   return 'rgb('+n+','+n+','+n+')';
 }
@@ -193,7 +195,6 @@ function applyPart(base, part, x, y){
 }
 
 function drawInvader(context, x0, y0, invader){
-  var pixelSize = 10;
   context.fillStyle = 'rgb(200,200,200)';
   context.clearRect(0,0,PARAMS.CANVAS_WIDTH,PARAMS.CANVAS_HEIGHT);
   
@@ -204,7 +205,12 @@ function drawInvader(context, x0, y0, invader){
       var xPos = x>=len? x-(x-len+1)*2 : x;
       if(invader[y][xPos]){
         context.fillStyle = invader[y][xPos].color;
-        context.fillRect(x0+x*pixelSize,y0+y*pixelSize,pixelSize,pixelSize);        
+        context.fillRect(
+          x0+x*PARAMS.PIXEL_SIZE,
+          y0+y*PARAMS.PIXEL_SIZE,
+          PARAMS.PIXEL_SIZE,
+          PARAMS.PIXEL_SIZE
+        );
       }
     }
   }  
