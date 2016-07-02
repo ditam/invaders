@@ -53,7 +53,8 @@ document.addEventListener('DOMContentLoaded', function(){
   function startGeneration() {
     if(runCount === 0){
       ctx.clearRect(0,0,PARAMS.CANVAS_WIDTH,PARAMS.CANVAS_HEIGHT);
-      //TODO: draw black background so that "save image as" saves background too
+      ctx.fillSTyle = 'black';
+      ctx.fillRect(0,0,PARAMS.CANVAS_WIDTH,PARAMS.CANVAS_HEIGHT);
     }
     runCount++;
     collectInput(function(inputs){
