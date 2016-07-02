@@ -2,6 +2,7 @@
   COLLECTION_TIME: 1000,
   MAX_COLOR_BIAS: 3,
   MOVE_THRESHOLD: 200,
+  MOVE_THRESHOLD_SMALL: 50,
   MOVE_ADJUSTMENT_MULTIPLIER: 2,
   INPUT_WIDTH: 300,
   INPUT_HEIGHT: 250,
@@ -216,9 +217,32 @@ function thrusterMutator(invader, input){
     color: getColorString(input.moveCount, biasR, biasG, biasB)
   };
   var part = [
-    [p,0,0,0],
-    [0,p,p,0]
+    [0,0,0,0],
+    [0,0,0,0]
   ];
+  var thrusters = [
+    [p,0,0],
+    [0,p,p]
+  ];
+  if(input.firstMove && input.lastMove){
+    if(input.moveCount%3 === 1){
+      thrusters = [
+        [p,p,p,p],
+        [p,0,0,p]
+      ];
+    } else if(input.moveCount%3 === 2){
+      thrusters = [
+        [p,p,0,0],
+        [0,0,0,0]
+      ];
+    } else if(input.moveCount > PARAMS.MOVE_THRESHOLD_SMALL){
+      thrusters = [
+        [p,0,p,0],
+        [0,p,0,p]
+      ]
+    }
+  }
+  part = applyPart(part, thrusters, 0, 0);
   return applyPart(invader, part, 2, 6);
 }
 
