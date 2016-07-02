@@ -201,6 +201,25 @@ function weaponMutator(invader, input){
     [p,0],
     [0,0]
   ];
+  var weapon = [
+    [0,0],
+    [0,0],
+    [0,0],
+    [0,0],
+    [0,0]
+  ];
+  if(input.moveCount > PARAMS.MOVE_THRESHOLD_SMALL){
+    weapon = [];
+    var binArray = input.moveCount.toString(2).split('');
+    //normalize and replace 1s with base pixel
+    binArray = binArray.map(function(el){
+      return el==='1'? p: 0;
+    });
+    while(binArray.length > 0) {
+      weapon.push(binArray.splice(0,2));
+    }
+  }
+  part = applyPart(part, weapon, 0, 0);
   return applyPart(invader, part, 0, 0);
 }
 
