@@ -44,8 +44,17 @@ document.addEventListener('DOMContentLoaded', function(){
 
   var mutators = [hullMutator, antennaMutator, weaponMutator, thrusterMutator];
 
+  function resetMutators(){
+    mutators = [hullMutator, antennaMutator, weaponMutator, thrusterMutator];
+  }
+
   function startGeneration() {
     collectInput(function(inputs){
+      // --- add a special random mutator, without a dedicated collection interval
+      // it gets the same input as the first mutator
+      mutators.push(randomMutator);
+      inputs.push(inputs[0]);
+      // ----
       var invader = mutateInvader(baseInvader, inputs, mutators);
       display(invader);
     });
@@ -92,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function(){
           inputArea.removeEventListener('mousemove', moveCounter);
           callback(inputSeed);
           progressButton.innerHTML = 'Fleet generated. (Click to restart)';
+          resetMutators();
           progressButton.addEventListener('click', clickHandler);
         }
       }, PARAMS.COLLECTION_TIME*(i+1));
@@ -263,6 +273,57 @@ function thrusterMutator(invader, input){
   }
   part = applyPart(part, thrusters, 0, 0);
   return applyPart(invader, part, 2, 6);
+}
+
+function randomMutator(invader, input){
+  var p = {
+    color: getColorString(input.moveCount, 0.5, 0.5, 0.5)
+  };
+  var mutation = [
+    [0,0],
+    [0,0]
+  ];
+  if(input.moveCount){
+    var _ = (input.moveCount%2)? 0 : null; //50% chance to clear
+    switch(input.moveCount%5){
+      case 0:
+        mutation = [
+          [_,p],
+          [_,p]
+        ];
+        break;
+      case 1:
+        mutation = [
+          [_,_],
+          [p,p]
+        ];
+        break;
+      case 2:
+        mutation = [
+          [p,_],
+          [_,p]
+        ];
+        break;
+      case 3:
+        mutation = [
+          [_,p],
+          [p,_]
+        ];
+        break;
+      case 4:
+        mutation = [
+          [_,p],
+          [p,p]
+        ];
+        break;
+    }
+  }
+  // +4 offset ensures that it does not clear anything from the standard invader
+  // if there was no input (clears between antennae)
+  // The min call ensures that we don't override cells outside of the invader boundary
+  var x = Math.min( (input.moveCount+4) % invader[0].length, invader[0].length-mutation[0].length );
+  var y = Math.min( (input.moveCount*101) % invader.length, invader.length-mutation.length);
+  return applyPart(invader, mutation, x, y);
 }
 
 function getColorString(moveCount, biasR, biasG, biasB){
