@@ -4,7 +4,9 @@
 
 var PARAMS = Object.freeze({
   COLLECTION_TIME: 1000,
-  MOVE_THRESHOLD: 200
+  MOVE_THRESHOLD: 200,
+  CANVAS_WIDTH: 500,
+  CANVAS_HEIGHT: 300
 });
   
 document.addEventListener('DOMContentLoaded', function(){
@@ -118,9 +120,18 @@ function hullMutator(invader, input){
   var basePixel = {
     color: getColorString(input.moveCount)
   };
+  var eye = 0;
+  if(input.firstMove && input.lastMove){
+    //only color eyes if movement was downwards - should be rare due to layout
+    if(input.firstMove.y < input.lastMove.y ){
+      eye = {
+        color: input.firstMove.x < input.lastMove.x? 'rgb(200,15,15)' : 'rgb(50,175,20)'
+      };
+    }
+  }
   var part = [
     [0,0,0,basePixel], // antenna will overwrite first 3 anyway
-    [basePixel,0,basePixel,basePixel], //2nd empty for "eye"
+    [basePixel,eye,basePixel,basePixel],
     [basePixel,basePixel,basePixel,basePixel],
     [basePixel,basePixel,basePixel,basePixel]
   ];
@@ -188,6 +199,7 @@ function applyPart(base, part, x, y){
 function drawInvader(context, x0, y0, invader){
   var pixelSize = 10;
   context.fillStyle = 'rgb(200,200,200)';
+  context.clearRect(0,0,PARAMS.CANVAS_WIDTH,PARAMS.CANVAS_HEIGHT);
   
   for(var y=0;y<invader.length;y++){
     var len = invader[y].length;
