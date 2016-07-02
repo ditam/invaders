@@ -166,6 +166,23 @@ function antennaMutator(invader, input){
     [0,p,0,0],
     [p,p,p,null]
   ];
+  var antenna = [[]];
+  //tilt antennae based on movement direction:
+  if(input.firstMove && input.lastMove){
+    var antenna;
+    if( Math.abs(input.firstMove.x-input.lastMove.x)<100 ){
+      antenna = [
+        [0,p],
+        [0,p]
+      ];
+    } else if (input.firstMove.x < input.lastMove.x){
+      antenna = [
+        [0,0,p],
+        [0,p,0]
+      ];
+    }
+  }
+  part = applyPart(part, antenna, 0, 0);
   return applyPart(invader, part, 2, 0);
 }
 
