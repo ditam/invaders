@@ -118,33 +118,33 @@ function mutateInvader(base, inputs, mutators){
 }
 
 function hullMutator(invader, input){
-  var basePixel = {
+  var p = { //base pixel
     color: getColorString(input.moveCount)
   };
-  var secondaryPixel = deepCopy(basePixel);
+  var s = deepCopy(p); //secondary pixel
   if(input.firstMove && input.lastMove){
     var x0 = input.firstMove.x;
     var y0 = input.firstMove.y;
     var x1 = input.lastMove.x;
     var y1 = input.lastMove.y;
     if(Math.abs(x0-x1)<100 && Math.abs(y0-y1)<100){
-      secondaryPixel.color = getColorString(input.moveCount, 0.8, 0.8, 1)
+      s.color = getColorString(input.moveCount, 0.8, 0.8, 1)
     }
   }
-  var eye = 0;
+  var e = 0; //eye pixel
   if(input.firstMove && input.lastMove){
     //only color eyes if movement was downwards - should be rare due to layout
     if(input.firstMove.y < input.lastMove.y ){
-      eye = {
+      e = {
         color: input.firstMove.x < input.lastMove.x? 'rgb(200,15,15)' : 'rgb(50,175,20)'
       };
     }
   }
   var part = [
-    [0,0,0,secondaryPixel], // antenna will overwrite first 3 anyway
-    [secondaryPixel,eye,secondaryPixel,basePixel],
-    [basePixel,secondaryPixel,basePixel,secondaryPixel],
-    [secondaryPixel,basePixel,secondaryPixel,basePixel]
+    [0,0,0,s], // antenna will overwrite first 3 anyway
+    [s,e,s,p],
+    [p,s,p,s],
+    [s,p,s,p]
   ];
   return applyPart(invader, part, 2, 2);
 }
@@ -158,29 +158,29 @@ function antennaMutator(invader, input){
     biasG = input.firstMove.y/PARAMS.INPUT_HEIGHT;
     biasB = input.lastMove.x/PARAMS.INPUT_WIDTH;
   }
-  var basePixel = {
+  var p = {
     color: getColorString(input.moveCount, biasR, biasG, biasB)
   };
   var part = [
-    [basePixel,0,0,0],
-    [0,basePixel,0,0],
-    [basePixel,basePixel,basePixel,null]
+    [p,0,0,0],
+    [0,p,0,0],
+    [p,p,p,null]
   ];
   return applyPart(invader, part, 2, 0);
 }
 
 function weaponMutator(invader, input){
-  var basePixel = {
+  var p = {
     color: getColorString(input.moveCount)
   };
   var part = [
     [0,0],
     [0,0],
     [0,0],
-    [0,basePixel],
-    [basePixel,basePixel],
-    [basePixel,0],
-    [basePixel,0],
+    [0,p],
+    [p,p],
+    [p,0],
+    [p,0],
     [0,0]
   ];
   return applyPart(invader, part, 0, 0);
@@ -195,12 +195,12 @@ function thrusterMutator(invader, input){
     var biasG = input.lastMove.x > input.lastMove.y? 1: 0;
     var biasB = (input.lastMove.x<20 && input.lastMove.y<20)? 0: 1;
   }
-  var basePixel = {
+  var p = {
     color: getColorString(input.moveCount, biasR, biasG, biasB)
   };
   var part = [
-    [basePixel,0,0,0],
-    [0,basePixel,basePixel,0]
+    [p,0,0,0],
+    [0,p,p,0]
   ];
   return applyPart(invader, part, 2, 6);
 }
