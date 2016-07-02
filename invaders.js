@@ -205,8 +205,8 @@ function weaponMutator(invader, input){
     [0,0],
     [0,0],
     [0,0],
-    [0,0],
-    [0,0]
+    [0,p],
+    [p,p]
   ];
   if(input.moveCount > PARAMS.MOVE_THRESHOLD_SMALL){
     weapon = [];
