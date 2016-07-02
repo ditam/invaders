@@ -1,8 +1,4 @@
-﻿var _1 = {
-  color: 'rgb(200,200,100)'
-};
-
-var PARAMS = Object.freeze({
+﻿var PARAMS = Object.freeze({
   COLLECTION_TIME: 1000,
   MOVE_THRESHOLD: 200,
   CANVAS_WIDTH: 500,
