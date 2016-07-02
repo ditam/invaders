@@ -8,11 +8,13 @@
   INPUT_HEIGHT: 250,
   CANVAS_WIDTH: 500,
   CANVAS_HEIGHT: 300,
-  PIXEL_SIZE: 10
+  PIXEL_SIZE: 5,
+  INVADER_COUNT: 7
 });
   
 document.addEventListener('DOMContentLoaded', function(){
 
+  var runCount = 0;
   var ctx = document.getElementById('fleet-display').getContext('2d');
   var progressButton = document.getElementById('button-progress');
   var clickHandler = function(){ startGeneration(); };
@@ -49,6 +51,11 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   function startGeneration() {
+    if(runCount === 0){
+      ctx.clearRect(0,0,PARAMS.CANVAS_WIDTH,PARAMS.CANVAS_HEIGHT);
+      //TODO: draw black background so that "save image as" saves background too
+    }
+    runCount++;
     collectInput(function(inputs){
       // --- add a special random mutator, without a dedicated collection interval
       // it gets the same input as the first mutator
@@ -82,13 +89,13 @@ document.addEventListener('DOMContentLoaded', function(){
     inputArea.addEventListener('mousemove', moveCounter);
 
     progressButton.removeEventListener('click', clickHandler);
-    progressButton.innerHTML = 'Generating fleet... (0/'+mutators.length+')';
+    progressButton.innerHTML = 'Generating row... (0/'+mutators.length+')';
 
     //Dispatch a timeout for each mutator, with increasing delays. Mouse moves are
     // collected between the callbacks, creating the input seed for each mutator.
     mutators.forEach(function(_, i){
       setTimeout(function(){
-        progressButton.innerHTML = 'Generating fleet... ('+(i+1)+'/'+mutators.length+')';
+        progressButton.innerHTML = 'Generating row... ('+(i+1)+'/'+mutators.length+')';
         inputSeed.push({
           moveCount: moveCount,
           firstMove: firstMove,
@@ -103,15 +110,30 @@ document.addEventListener('DOMContentLoaded', function(){
           progressButton.innerHTML = 'Fleet generated. (Click to restart)';
           resetMutators();
           progressButton.addEventListener('click', clickHandler);
+          if(runCount < 3){
+            clickHandler();
+          } else {
+            runCount = 0;
+          }
         }
       }, PARAMS.COLLECTION_TIME*(i+1));
     });
 
   }
 
-  //TODO: extend this function to display rows (the whole fleet)
   function display(invader){
-    drawInvader(ctx,0,0,invader);
+    var colWidth = (11+3)*PARAMS.PIXEL_SIZE;
+    var rowHeight = (8+3)*PARAMS.PIXEL_SIZE;
+    for(var i=0;i<PARAMS.INVADER_COUNT;i++){
+      for(var row=0;row<2;row++){
+        drawInvader(
+          ctx,
+          2*PARAMS.PIXEL_SIZE+(i*colWidth),
+          -(rowHeight)+2*PARAMS.PIXEL_SIZE+(row*rowHeight)+((runCount-1)*2*rowHeight),
+          invader
+        );
+      }
+    }
   }
 
 });
@@ -351,8 +373,6 @@ function applyPart(base, part, x, y){
 }
 
 function drawInvader(context, x0, y0, invader){
-  context.clearRect(0,0,PARAMS.CANVAS_WIDTH,PARAMS.CANVAS_HEIGHT);
-  
   for(var y=0;y<invader.length;y++){
     var len = invader[y].length;
     //we're mirroring every column but the last
